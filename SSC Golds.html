@@ -2716,7 +2716,7 @@
 
             document.getElementById("loader-counter").innerText = '1';
 
-            fetch("https://api.codetabs.com/v1/proxy?quest=https://mcxlive.org/", {
+            fetch(`https://api.codetabs.com/v1/proxy?quest=https://mcxlive.org/?_=${Number(new Date())}`, {
             "referrerPolicy": "strict-origin-when-cross-origin",
             "body": null,
             "method": "GET",
@@ -2742,7 +2742,7 @@
 
             document.getElementById("loader-counter").innerText = '0';
 
-            fetch("https://api.codetabs.com/v1/proxy?quest=https://liveindex.org/mcx-india/", {
+            fetch(`https://api.codetabs.com/v1/proxy?quest=https://liveindex.org/mcx-india/?_=${Number(new Date())}`, {
             "referrerPolicy": "strict-origin-when-cross-origin",
             "body": null,
             "method": "GET",
