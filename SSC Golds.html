@@ -3027,7 +3027,7 @@
                                                         displayTwoNumbers(prbullion.silver_rate, amsbullion.silver_rate , silver_precision_value) + ' [' +
                                                         displayTwoNumbers(silver_asso_difference_pr, silver_asso_difference_ams, silver_precision_value,true) + ']';
                 
-                document.querySelector('#footerbox2 #gold92liveratevalue').innerText = `${Math.trunc(Number(prbullion.gold_rate)*0.92)}(${Math.trunc(Number(amsbullion.gold_rate)*0.92)})`;
+                document.querySelector('#footerbox2 #gold92liveratevalue').innerText = displayTwoNumbers(Math.trunc(Number(prbullion.gold_rate)*0.92),Math.trunc(Number(amsbullion.gold_rate)*0.92),0);
 
                 document.getElementById("loader-counter").innerText = '';
                 intervalHandle = setTimeout(getLiveRates, 2000);
