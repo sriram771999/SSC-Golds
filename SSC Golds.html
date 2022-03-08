@@ -2704,10 +2704,10 @@
                 return 0;
             }
             
-            if(localStorage.getItem('pr_following_mini') == 'true')
+            if (localStorage.getItem('pr_following_silvermini') == 'true')
                 getMcxLiveOrg();
-            // else if(localStorage.getItem('pr_following_silvermini') == 'true')
-            //     getInvestingComSilver();
+            else if (localStorage.getItem('pr_following_mini') == 'true')
+                getThahsanaLiveRates();
             else
                 getAMSLiveRate();
         }
@@ -2723,13 +2723,13 @@
             "mode": "cors",
             }).then(x => x.text())
             .then(y => {
-                moneycontrol_com.mcx_gold_mini = +(new DOMParser().parseFromString(y, "text/html").documentElement.querySelector('.main-table tr:nth-child(2) td:nth-child(2)').innerText.replace(/\D/g,''))/100; 
+                // moneycontrol_com.mcx_gold_mini = +(new DOMParser().parseFromString(y, "text/html").documentElement.querySelector('.main-table tr:nth-child(2) td:nth-child(2)').innerText.replace(/\D/g,''))/100; 
                 moneycontrol_com.mcx_silver_mini = +(new DOMParser().parseFromString(y, "text/html").documentElement.querySelector('.main-table tr:nth-child(5) td:nth-child(2)').innerText.replace(/\D/g,''))/100;
 
-                moneycontrol_com.mcx_gold_mini /= gold_rate_weight_factor;
+                // moneycontrol_com.mcx_gold_mini /= gold_rate_weight_factor;
                 moneycontrol_com.mcx_silver_mini /= silver_rate_weight_factor;
 
-                getAMSLiveRate();
+                getThahsanaLiveRates();
                 
             })
             .catch(e => {
@@ -2749,13 +2749,13 @@
             "mode": "cors",
             }).then(x => x.text())
             .then(y => {
-                moneycontrol_com.mcx_gold_mini = +(new DOMParser().parseFromString(y, "text/html").documentElement.querySelector('.main-content .index_table tr:nth-child(4) td:nth-child(3)').innerText.replace(/\D/g,''))/100; 
+                // moneycontrol_com.mcx_gold_mini = +(new DOMParser().parseFromString(y, "text/html").documentElement.querySelector('.main-content .index_table tr:nth-child(4) td:nth-child(3)').innerText.replace(/\D/g,''))/100; 
                 moneycontrol_com.mcx_silver_mini = +(new DOMParser().parseFromString(y, "text/html").documentElement.querySelector('.main-content .index_table tr:nth-child(10) td:nth-child(3)').innerText.replace(/\D/g,''))/100;
 
-                moneycontrol_com.mcx_gold_mini /= gold_rate_weight_factor;
+                // moneycontrol_com.mcx_gold_mini /= gold_rate_weight_factor;
                 moneycontrol_com.mcx_silver_mini /= silver_rate_weight_factor;
 
-                getAMSLiveRate();
+                getThahsanaLiveRates();
             })
             .catch(e => {
                 console.log(e);
@@ -2857,9 +2857,62 @@
         //         });
         // }
 
-        function getAMSLiveRate() {
+        function getThahsanaLiveRates() {
 
             document.getElementById("loader-counter").innerText = '2';
+
+            fetch(`http://bcast.thashna.com:7767/VOTSBroadcastStreaming/Services/xml/GetLiveRateByTemplateID/thashna?_=${Number(new Date())}`, {
+              "headers": {
+                "accept": "text/plain, */*; q=0.01",
+                "accept-language": "en-IN,en-GB;q=0.9,en-US;q=0.8,en;q=0.7"
+              },
+              "referrer": "http://amsbullion.com/",
+              "referrerPolicy": "strict-origin-when-cross-origin",
+              "body": null,
+              "method": "GET",
+              "mode": "cors",
+              "credentials": "omit",
+            }).then(x => x.text())
+            .then(y => {
+                data = $.trim(y);
+                if(data != "")
+                {
+                    data = data.split("\t").join(",");
+                    lines = data.split(/\r\n|\n\r|\n|\r/g);
+                    output = "";
+                    for (i = 0; i < lines.length; i++)
+                    {
+                        output += "<tr>";
+                            col = lines[i].split(",");
+                            for(j = 0; j < col.length; j++)
+                            {
+                                output += "<td>" + col[j] + "</td>";
+                            }
+                        output += "</tr>";
+                    }
+                    output = "<table>" + output + "</table>";
+
+                    var goldmini = Number(new DOMParser().parseFromString(output, "text/html").documentElement.querySelector('table tr:nth-child(3) td:nth-child(5)').textContent);
+
+                    moneycontrol_com.mcx_gold_mini = goldmini / gold_rate_weight_factor;
+                    getAMSLiveRate();
+                }
+            }).catch(e => {
+                console.log(e)
+                document.querySelector('#footerbox1').hidden = true;
+                document.querySelector('#footerbox2').hidden = true;
+                document.getElementById('footerrefreshbutton').hidden = false;
+                document.querySelector('#footerbox1 #goldliveratevalue').hidden = true;
+                document.querySelector('#footerbox1 #silverliveratevalue').hidden = true;
+                document.querySelector('#footerbox2 #gold92liveratevalue').hidden = true;
+                document.querySelector('#footerbox1 #goldpredictedratevalue').hidden = true;
+                clearTimeout(intervalHandle);
+            });
+        }
+
+        function getAMSLiveRate() {
+
+            document.getElementById("loader-counter").innerText = '3';
 
             fetch(`http://bcast.amsbullion.com:7767/VOTSBroadcastStreaming/Services/xml/GetLiveRateByTemplateID/amsbullion?_=${Number(new Date())}`, {
               "headers": {
@@ -2923,7 +2976,7 @@
 
         function getPRLiveRate()
         {
-            document.getElementById("loader-counter").innerText = '3';
+            document.getElementById("loader-counter").innerText = '4';
 
             fetch("http://www.priyankabullion.com/index.php/C_booking/get_commodity_data", {
             "referrerPolicy": "strict-origin-when-cross-origin",
