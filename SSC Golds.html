@@ -2546,7 +2546,7 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
             if(!IsMduNotificationActive) {
                 document.getElementById("test1").innerHTML = `<h4>Loading MDU...</h4>`;
 
-                fetchCustom(`http://mjbma.com?_=${Number(new Date())}`, y => {
+                fetchCustom(`http://mjbma.com`, y => {
                         var finder = new DOMParser().parseFromString(y, "text/html").documentElement.querySelector('.rate-table').parentNode.querySelector('div');
                         console.log(finder);
                         var updatedTime = finder != null ? finder.innerText : '';
@@ -2697,7 +2697,7 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
             document.getElementById('online_rate_value_time').innerText = '';
 
             if (localStorage.getItem('online_market_association') == 'madurai') {
-                fetchCustom(`http://mjbma.com?_=${Number(new Date())}`, y => {
+                fetchCustom(`http://mjbma.com`, y => {
                     online_market = {
                         gold_rate: new DOMParser().parseFromString(y, "text/html").documentElement.querySelector('.rate-table tbody tr:nth-child(2) td:nth-child(3)').innerText,
                         silver_rate: new DOMParser().parseFromString(y, "text/html").documentElement.querySelector('.rate-table tbody tr:nth-child(3) td:nth-child(3)').innerText,
@@ -3095,6 +3095,9 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
             }).then(x => x.json())
             .then(y => {
 
+                var market_rate_loss_difference = -80;
+                var silver_excess_difference = 4;
+
                 if(localStorage.getItem('pr_following_mini') == 'true')
                     pr_mcx_val = roundTo(moneycontrol_com.mcx_gold_mini,gold_precision_value);
                 else
@@ -3105,10 +3108,27 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                 else
                     pr_silver_mcx_val = roundTo(amsbullion.mcx_silver,silver_precision_value);
 
+                    
                 prbullion.gold_sell_difference = Number(y.commodity.commoditydetails[1].sell_diff) / gold_rate_weight_factor;
                 prbullion.silver_sell_difference = Number(y.commodity.commoditydetails[2].sell_diff) / silver_rate_weight_factor;
                 amsbullion.gold_sell_difference = amsbullion.gold_rate - tcs_value - amsbullion.mcx_gold;
                 amsbullion.silver_sell_difference = amsbullion.silver_rate - amsbullion.mcx_silver;
+
+                predictionvalues.value = roundTo(roundTo(predictionvalues.usdperounce,2)*roundTo(predictionvalues.inrperusd,3)/predictionvalues.ouncetogm,2);
+                var predictionWithTaxes = roundTo(predictionvalues.value * 1.15,2);
+
+                var format = 'hh:mm:ss'
+                var time = moment();
+                var beforeTime = moment('00:00:00', format),
+                afterTime = moment('09:00:00', format);
+
+                if (time.isBetween(beforeTime, afterTime)) {
+                    console.log('is between')
+                    pr_mcx_val = predictionWithTaxes - Number(localStorage.getItem('world_mcx_prevoius_day_differce_pr'));
+                    amsbullion.mcx_gold = predictionWithTaxes - Number(localStorage.getItem('world_mcx_prevoius_day_differce_ams'));
+
+                } 
+
 
                 var pr_gold_breakup_values = {
                     mcx: pr_mcx_val,
@@ -3156,12 +3176,17 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                 document.querySelector('#footerbox2 #gold92liveratevalue').hidden = false;
                 document.querySelector('#footerbox1 #goldpredictedratevalue').hidden = false;
 
-                predictionvalues.value = roundTo(roundTo(predictionvalues.usdperounce,2)*roundTo(predictionvalues.inrperusd,3)/predictionvalues.ouncetogm,2);
-                var predictionWithTaxes = roundTo(predictionvalues.value * 1.15,2);
                 var predictionDifferenceWithPr = predictionWithTaxes - pr_gold_breakup_values.mcx;
                 var predictionDifferenceWithAms = predictionWithTaxes - ams_gold_breakup_values.mcx;
                 var silver_asso_difference_pr = Number(online_market.silver_rate) - Number(prbullion.silver_rate);
                 var silver_asso_difference_ams = Number(online_market.silver_rate) - Number(amsbullion.silver_rate);
+
+                if (!time.isBetween(beforeTime, afterTime)) {
+                    console.log('is not between')                    
+                    localStorage.setItem('world_mcx_prevoius_day_differce_pr',predictionDifferenceWithPr);
+                    localStorage.setItem('world_mcx_prevoius_day_differce_ams',predictionDifferenceWithAms);
+                }
+                console.log(localStorage.getItem('world_mcx_prevoius_day_differce_pr'),localStorage.getItem('world_mcx_prevoius_day_differce_ams'))
 
                 function displayWithSign(numberValue,precisionValue){
                     return ['-','+'][+(numberValue > 0)] + roundTo(Math.abs(numberValue),precisionValue,'string');
@@ -3173,7 +3198,6 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                     return resValue;
                 }
 
-
                 document.querySelector('#footerbox1 .startOfEllipsis').innerText = `(${roundTo(predictionvalues.usdperounce,2,'string')} * ${roundTo(predictionvalues.inrperusd,3,'string')} / 31.1035) + 15%  = (${roundTo(predictionvalues.value,2,'string')} + 15% ) = ${roundTo(predictionWithTaxes,2,'string')}`;
                 document.querySelector('#footerbox1 .endOfEllipsis').innerText = ` [${displayTwoNumbers(predictionDifferenceWithPr,predictionDifferenceWithAms,2,true)}]`;
 
@@ -3182,18 +3206,21 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                                                         displayTwoNumbers(pr_gold_breakup_values.tax, ams_gold_breakup_values.tax, 0) + ' + ' +
                                                         displayTwoNumbers(pr_gold_breakup_values.difference, ams_gold_breakup_values.difference, gold_precision_value) + ' + ' +
                                                         displayTwoNumbers(pr_gold_breakup_values.tcs, ams_gold_breakup_values.tcs, 0) + ' = ' +                                                 
-                                                        displayTwoNumbers(prbullion.gold_rate, amsbullion.gold_rate, gold_precision_value);
+                                                        displayTwoNumbers(prbullion.gold_rate, amsbullion.gold_rate, gold_precision_value)
+                                                        + ' [' +
+                                                        displayTwoNumbers((Math.trunc((Number(prbullion.gold_rate)*0.92)+market_rate_loss_difference)) -  Number(online_market.gold_rate) ,(Math.trunc((Number(amsbullion.gold_rate)*0.92)+market_rate_loss_difference)) -  Number(online_market.gold_rate) ,2, true) + ']';
                 
                 document.querySelector('#footerbox1 #silverliveratevalue').innerText = 
                                                         displayTwoNumbers(pr_silver_breakup_values.mcx, ams_silver_breakup_values.mcx, silver_precision_value) + ' + ' +
                                                         displayTwoNumbers(pr_silver_breakup_values.difference, ams_silver_breakup_values.difference, silver_precision_value) + ' = ' +
                                                         displayTwoNumbers(prbullion.silver_rate, amsbullion.silver_rate , silver_precision_value) + ' [' +
-                                                        displayTwoNumbers(silver_asso_difference_pr, silver_asso_difference_ams, silver_precision_value,true) + ']';
-                document.querySelector('#footerbox1 #goldsilverratioratevalue').innerText = 
-                                                        `${predictionvalues.usdperounce.toFixed(2)}(${amsbullion.mcx_gold.toFixed(2)})[${amsbullion.gold_rate.toFixed(2)}]<${Number(online_market.gold_rate).toFixed(2)}>` + ' / ' +
-                                                        `${predictionvalues.silverusdperounce.toFixed(2)}(${amsbullion.mcx_silver.toFixed(2)})[${amsbullion.silver_rate.toFixed(2)}]<${Number(online_market.silver_rate).toFixed(2)}>` + ' = ' + `${(Number(predictionvalues.usdperounce.toFixed(2))/Number(predictionvalues.silverusdperounce.toFixed(2))).toFixed(2)}(${(Number(amsbullion.mcx_gold.toFixed(2))/Number(amsbullion.mcx_silver.toFixed(2))).toFixed(2)})[${(Number(amsbullion.gold_rate.toFixed(2))/Number(amsbullion.silver_rate.toFixed(2))).toFixed(2)}]<${(Number(Number(online_market.gold_rate).toFixed(2))/Number(Number(online_market.silver_rate).toFixed(2))).toFixed(2)}>`;
+                                                        displayTwoNumbers(silver_asso_difference_pr, silver_asso_difference_ams, silver_precision_value,true) + ']' + ' >> '
+                                                        + displayTwoNumbers(prbullion.silver_rate + silver_excess_difference, amsbullion.silver_rate + silver_excess_difference, 2);
+                // document.querySelector('#footerbox1 #goldsilverratioratevalue').innerText = 
+                //                                         `${predictionvalues.usdperounce.toFixed(2)}(${amsbullion.mcx_gold.toFixed(2)})[${amsbullion.gold_rate.toFixed(2)}]<${Number(online_market.gold_rate).toFixed(2)}>` + ' / ' +
+                //                                         `${predictionvalues.silverusdperounce.toFixed(2)}(${amsbullion.mcx_silver.toFixed(2)})[${amsbullion.silver_rate.toFixed(2)}]<${Number(online_market.silver_rate).toFixed(2)}>` + ' = ' + `${(Number(predictionvalues.usdperounce.toFixed(2))/Number(predictionvalues.silverusdperounce.toFixed(2))).toFixed(2)}(${(Number(amsbullion.mcx_gold.toFixed(2))/Number(amsbullion.mcx_silver.toFixed(2))).toFixed(2)})[${(Number(amsbullion.gold_rate.toFixed(2))/Number(amsbullion.silver_rate.toFixed(2))).toFixed(2)}]<${(Number(Number(online_market.gold_rate).toFixed(2))/Number(Number(online_market.silver_rate).toFixed(2))).toFixed(2)}>`;
+                document.querySelector('#footerbox1 #goldsilverratioratevalue').innerText = `${(Number(predictionvalues.usdperounce.toFixed(2))/Number(predictionvalues.silverusdperounce.toFixed(2))).toFixed(2)}(${(Number(amsbullion.mcx_gold.toFixed(2))/Number(amsbullion.mcx_silver.toFixed(2))).toFixed(2)})[${(Number(amsbullion.gold_rate.toFixed(2))/Number(amsbullion.silver_rate.toFixed(2))).toFixed(2)}]<${(Number(Number(online_market.gold_rate).toFixed(2))/Number(Number(online_market.silver_rate).toFixed(2))).toFixed(2)}>`;
                 
-                var market_rate_loss_difference = -80;
                 document.querySelector('#footerbox2 #gold92liveratevalue').innerText = displayTwoNumbers(Math.trunc(Number(prbullion.gold_rate)*0.92),Math.trunc(Number(amsbullion.gold_rate)*0.92),0) + ' >> ' + displayTwoNumbers(Math.trunc((Number(prbullion.gold_rate)*0.92)+market_rate_loss_difference),Math.trunc((Number(amsbullion.gold_rate)*0.92)+market_rate_loss_difference),0);
 
                 document.getElementById("loader-counter").innerText = '';
