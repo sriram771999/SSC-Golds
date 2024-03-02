@@ -826,6 +826,12 @@
                 var purenettotalweightbox = document.getElementById('purenettotalweightbox');
                 purenettotalweightbox.innerHTML = purenetTotalWeight.toFixed(3) + ' g';
 
+                var avgpercentval = (Number(pureTotalWeight.toFixed(3)) / Number(purenetTotalWeight.toFixed(3)) * 100); 
+                var avgPercentBeautifyRule = avgpercentval.toString().split(".");
+                avgPercentBeautifyRule = (avgPercentBeautifyRule[1] && Number(avgPercentBeautifyRule[1]) > 0);
+                var pureavgpercentagebox = document.getElementById('pureavgpercentage');
+                pureavgpercentagebox.innerHTML = (avgPercentBeautifyRule ? avgpercentval.toFixed(2) : avgpercentval.toFixed(0)) + `<span style="font-size: 60%;">%</span>`;
+
                 document.getElementById('pureAddFactorBox').innerText = '0.000';
             } else {
                 if (results.weight == 0 || results.quality == 0 || results.bullionrate == 0)
@@ -868,7 +874,7 @@
                 puretotalweightbox.innerHTML = ' &#x20B9; ' + convertCurrencyFormat(pureTotalCash.toFixed(2));
                 
                 var purenettotalweightbox = document.getElementById('purenettotalweightbox');
-                purenettotalweightbox.innerHTML = purenetTotalWeight.toFixed(3) + ' g';  
+                purenettotalweightbox.innerHTML = purenetTotalWeight.toFixed(3) + ' g';
 
                 document.getElementById('pureAddFactorBox').innerText = '0.00';
             }
@@ -1795,8 +1801,9 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                                         <div>
                                             <div class="top-mar5" style="height: 1px;border: 1px solid"></div>
                                             <div class="flex between">
-                                                <label style="margin-bottom: 0%;font-size: 110%;padding-left: 5px;color: gray;"><strong id='purenettotalweightbox'></strong></label>
-                                                <label style="margin-bottom: 0%;font-size: 100%;"><strong id='puretotalweightbox'></strong></label>
+                                                <label style="margin-bottom: 0%;font-size: 110%;color: gray;"><strong id='purenettotalweightbox' style="padding-left: 5px;"></strong></label>
+                                                <label style="margin-bottom: 0%;font-size: 100%;color: gray;"><strong id='pureavgpercentage'></strong></label>
+                                                <label style="margin-bottom: 0%;font-size: 100%;"><strong id='puretotalweightbox' style="padding-left: 28px;"></strong></label>
                                             </div>
                                         </div>
                                     </div>
@@ -2537,8 +2544,9 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
         var IsCheNotificationActive = false;
 
         setTimeout(checkMduUpdated,2000);
-        function setMduPrev(updatedTime) {
+        function setMduPrev(updatedTime, goldRate) {
             localStorage.setItem('mduTime',updatedTime);
+            localStorage.setItem('mduGold', goldRate);
             IsMduNotificationActive = false;
             setTimeout(checkMduUpdated,10000);
         }
@@ -2560,17 +2568,20 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                         document.getElementById("test1").innerHTML = `<span>Loaded</span><br/></span>prev=${localStorage.getItem('mduTime')}</span><br/></span>curr= ${updatedTime}</span><br/><strong>same</strong>`;
                         if (localStorage.getItem('mduTime') != null && updatedTime != '' && updatedTime != localStorage.getItem('mduTime')) {           
                             document.getElementById("test1").innerHTML = `<span>Passed</span><br/></span>prev=${localStorage.getItem('mduTime')}</span><br/></span>curr= ${updatedTime}</span><br/><strong>changed</strong>`;
+                            var goldDiff = Number(localStorage.getItem('mduGold')) > 0 ? Number(goldFinder).toFixed(0) - Number(localStorage.getItem('mduGold')) : 0;
                             AudioObject.play();
+
+                            var superscript = goldDiff != 0 ? goldDiff > 0 ? `<strong class="text-success"style="vertical-align: super;font-size: smaller;">+${100}</strong>` : `<strong class="text-danger"style="vertical-align: super;font-size: smaller;">${100}</strong>` : '';
 
                             IsMduNotificationActive = true;   
                             document.getElementById('alertbox').innerHTML += `
                                                                                 <div class="alert alert-danger alert-dismissible fade show" style="margin-left: 15px;margin-right: 15px;">
-                                                                                    <button type="button" class="btn-close" onclick="setMduPrev('${updatedTime}');" data-bs-dismiss="alert"></button>
+                                                                                    <button type="button" class="btn-close" onclick="setMduPrev('${updatedTime}','${Number(goldFinder).toFixed(0)}');" data-bs-dismiss="alert"></button>
                                                                                     <span>
                                                                                         <strong>Madurai Jewellers Association</strong> is updated ${formatFromNow(formatMduDate(updatedTime))}.
                                                                                     </span>
                                                                                     <div style="margin-top: 15px;">
-                                                                                        <span>Gold - <strong>${Number(goldFinder).toFixed(0)}</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Silver - <strong>${Number(silverFinder).toFixed(2)}</strong></span>
+                                                                                        <span>Gold - <strong>${Number(goldFinder).toFixed(0)}</strong> ${superscript}  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Silver - <strong>${Number(silverFinder).toFixed(2)}</strong></span>
                                                                                     </div>
                                                                                 </div>`
                     }
@@ -2600,6 +2611,7 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
         setTimeout(checkCheUpdated,2000);
         function setChePrev(updatedTime) {
             localStorage.setItem('cheTime',updatedTime);
+            localStorage.setItem('cheGold', goldRate);
             IsCheNotificationActive = false;
             setTimeout(checkCheUpdated,10000);
         }
@@ -2616,12 +2628,15 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                         document.getElementById("test2").innerHTML = `<span>Loaded</span><br/></span>prev=${localStorage.getItem('cheTime')}</span><br/></span>curr= ${updatedTime}</span><br/><strong>same</strong>`;
                         if (localStorage.getItem('cheTime') != null && updatedTime != '' && updatedTime != localStorage.getItem('cheTime')) {
                             document.getElementById("test2").innerHTML = `<span>Passed</span><br/></span>prev=${localStorage.getItem('cheTime')}</span><br/></span>curr= ${updatedTime}</span><br/><strong>changed</strong>`;
+                            var goldDiff = Number(localStorage.getItem('mduGold')) > 0 ? Number(goldFinder).toFixed(0) - Number(localStorage.getItem('mduGold')) : 0;
                             AudioObject.play();
+
+                            var superscript = goldDiff != 0 ? goldDiff > 0 ? `<strong class="text-success"style="vertical-align: super;font-size: smaller;">+${100}</strong>` : `<strong class="text-danger"style="vertical-align: super;font-size: smaller;">${100}</strong>` : '';
 
                             IsCheNotificationActive = true
                             document.getElementById('alertbox').innerHTML += `
                                                                                 <div class="alert alert-danger alert-dismissible fade show" style="margin-left: 15px;margin-right: 15px;">
-                                                                                    <button type="button" class="btn-close" onclick="setChePrev('${updatedTime}');" data-bs-dismiss="alert"></button>
+                                                                                    <button type="button" class="btn-close" onclick="setChePrev('${updatedTime}','${Number(goldFinder).toFixed(0)}');" data-bs-dismiss="alert"></button>
                                                                                     <span>
                                                                                         <strong>Chennai Jewellers Association</strong> is updated ${formatFromNow(formatCheDate(updatedTime))}.
                                                                                     </span>
@@ -2653,7 +2668,6 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                 })
             }
         }
-
         
         $(document).ready(function () {
             $('#association_toggle_button').on('click', function () {
