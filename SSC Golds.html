@@ -2571,7 +2571,7 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                             var goldDiff = Number(localStorage.getItem('mduGold')) > 0 ? Number(goldFinder).toFixed(0) - Number(localStorage.getItem('mduGold')) : 0;
                             AudioObject.play();
 
-                            var superscript = goldDiff != 0 ? goldDiff > 0 ? `<strong class="text-success"style="vertical-align: super;font-size: smaller;">+${100}</strong>` : `<strong class="text-danger"style="vertical-align: super;font-size: smaller;">${100}</strong>` : '';
+                            var superscript = goldDiff != 0 ? goldDiff > 0 ? `<strong class="text-success"style="vertical-align: super;font-size: smaller;">+${Number(goldDiff).toFixed(2)}</strong>` : `<strong class="text-danger"style="vertical-align: super;font-size: smaller;">-${Number(Math.abs(goldDiff)).toFixed(2)}</strong>` : '';
 
                             IsMduNotificationActive = true;   
                             document.getElementById('alertbox').innerHTML += `
@@ -2587,6 +2587,9 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                     }
                     if(localStorage.getItem('mduTime') == null) {
                         localStorage.setItem('mduTime',updatedTime);
+                    }
+                    if(localStorage.getItem('mduGold') == null) {
+                        localStorage.setItem('mduGold',Number(goldFinder).toFixed(0));
                     }
                     setTimeout(checkMduUpdated,30000);
                 },e => {
@@ -2609,7 +2612,7 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
             }
         }
         setTimeout(checkCheUpdated,2000);
-        function setChePrev(updatedTime) {
+        function setChePrev(updatedTime, goldRate) {
             localStorage.setItem('cheTime',updatedTime);
             localStorage.setItem('cheGold', goldRate);
             IsCheNotificationActive = false;
@@ -2628,10 +2631,10 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                         document.getElementById("test2").innerHTML = `<span>Loaded</span><br/></span>prev=${localStorage.getItem('cheTime')}</span><br/></span>curr= ${updatedTime}</span><br/><strong>same</strong>`;
                         if (localStorage.getItem('cheTime') != null && updatedTime != '' && updatedTime != localStorage.getItem('cheTime')) {
                             document.getElementById("test2").innerHTML = `<span>Passed</span><br/></span>prev=${localStorage.getItem('cheTime')}</span><br/></span>curr= ${updatedTime}</span><br/><strong>changed</strong>`;
-                            var goldDiff = Number(localStorage.getItem('mduGold')) > 0 ? Number(goldFinder).toFixed(0) - Number(localStorage.getItem('mduGold')) : 0;
+                            var goldDiff = Number(localStorage.getItem('cheGold')) > 0 ? Number(goldFinder).toFixed(0) - Number(localStorage.getItem('cheGold')) : 0;
                             AudioObject.play();
 
-                            var superscript = goldDiff != 0 ? goldDiff > 0 ? `<strong class="text-success"style="vertical-align: super;font-size: smaller;">+${100}</strong>` : `<strong class="text-danger"style="vertical-align: super;font-size: smaller;">${100}</strong>` : '';
+                            var superscript = goldDiff != 0 ? goldDiff > 0 ? `<strong class="text-success"style="vertical-align: super;font-size: smaller;">+${Number(goldDiff).toFixed(2)}</strong>` : `<strong class="text-danger"style="vertical-align: super;font-size: smaller;">-${Number(Math.abs(goldDiff)).toFixed(2)}</strong>` : '';
 
                             IsCheNotificationActive = true
                             document.getElementById('alertbox').innerHTML += `
@@ -2641,12 +2644,15 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                                                                                         <strong>Chennai Jewellers Association</strong> is updated ${formatFromNow(formatCheDate(updatedTime))}.
                                                                                     </span>
                                                                                     <div style="margin-top: 15px;">
-                                                                                        <span>Gold - <strong>${goldFinder}</strong> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Silver - <strong>${Number(silverFinder).toFixed(2)}</strong></span>
+                                                                                        <span>Gold - <strong>${goldFinder}</strong> ${superscript} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Silver - <strong>${Number(silverFinder).toFixed(2)}</strong></span>
                                                                                     </div>
                                                                                 </div>`
                     }
                     if(localStorage.getItem('cheTime') == null) {
                         localStorage.setItem('cheTime',updatedTime);
+                    }
+                    if(localStorage.getItem('cheGold') == null) {
+                        localStorage.setItem('cheGold',Number(goldFinder).toFixed(0));
                     }
                     setTimeout(checkCheUpdated,30000);
                 },e => {
