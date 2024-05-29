@@ -2625,10 +2625,9 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
 
                 fetchCustom(`https://thejewellersassociation.org/?_=${Number(new Date())}`, y => {
                         var updatedTime = pluckNumber(y,/\('#updatetime'\)\.html\("[A-Za-z0-9\/: ]+"\)/,/"(.*?)"/)[1];
-
                         goldFinder = pluckNumber(y,/\('#goldrate_22ct'\)\.html\("\d\d\d\d.00"\)/,/\d\d\d\d/);
-                        silverFinder = pluckNumber(y,/\('#silverrate_1gm'\)\.html\("\d\d.\d\d"\)/,/\d\d.\d\d/);
-
+                        silverFinder = pluckNumber(y,/\('#silverrate_1gm'\)\.html\("\d{2,3}.\d\d"\)/,/\d{2,3}.\d\d/);
+                        
                         document.getElementById("test2").innerHTML = `<span>Loaded</span><br/></span>prev=${localStorage.getItem('cheTime')}</span><br/></span>curr= ${updatedTime}</span><br/><strong>same</strong>`;
                         if (localStorage.getItem('cheTime') != null && updatedTime != '' && updatedTime != localStorage.getItem('cheTime')) {
                             document.getElementById("test2").innerHTML = `<span>Passed</span><br/></span>prev=${localStorage.getItem('cheTime')}</span><br/></span>curr= ${updatedTime}</span><br/><strong>changed</strong>`;
@@ -2691,7 +2690,7 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
         });
 
         function pluckNumber(text,pattern1,pattern2) {
-            return text.match(pattern1).toString().match(pattern2);
+            return text.match(pattern1)?.toString().match(pattern2);
         }
         function findWordPrefixandSuffixWith(sentence,start,end) {
             regexp = new RegExp(`(?:${start})(.*)(?:${end})`, "g");
@@ -2743,7 +2742,7 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
 
                 fetchCustom(`https://thejewellersassociation.org/?_=${Number(new Date())}`, y => {
                     var chennai_gold_rate = pluckNumber(y,/\('#goldrate_22ct'\)\.html\("\d\d\d\d.00"\)/,/\d\d\d\d/);
-                    var chennai_silver_rate = pluckNumber(y,/\('#silverrate_1gm'\)\.html\("\d\d.\d\d"\)/,/\d\d.\d\d/);
+                    var chennai_silver_rate = pluckNumber(y,/\('#silverrate_1gm'\)\.html\("\d{2,3}.\d\d"\)/,/\d{2,3}.\d\d/);
                     var chennai_update_time = pluckNumber(y,/\('#updatetime'\)\.html\("[A-Za-z0-9\/: ]+"\)/,/"(.*?)"/);
                     online_market = {
                         gold_rate: chennai_gold_rate,
