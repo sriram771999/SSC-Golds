@@ -1,0 +1,26 @@
+function fetchCustom(url,callback,catchMethod) {
+    if (localStorage.getItem('cors_server')==null || localStorage.getItem('cors_server')=='CodeTabs') {
+
+        fetch(`https://api.codetabs.com/v1/tmp/?quest=${url}`, {
+            "body": null,
+            "method": "GET",
+            "mode": "cors",
+            "credentials": "omit"
+        }).then(x => x.text())
+        .then(data => callback(data)).catch(e=> catchMethod(e));
+    } else {
+        fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
+            .then(response => {
+            if (response.ok) return response.json()
+            throw new Error('Network response was not ok.')
+            })
+            .then(data => callback(data.contents)).catch(e=> catchMethod(e));
+    }
+}
+
+
+fetchCustom(`https://thejewellersassociation.org/?_=${Number(new Date())}`, y => {
+    var updatedTime = pluckNumber(y,/\('#updatetime'\)\.html\("[A-Za-z0-9\/: ]+"\)/,/"(.*?)"/)[1];
+    var goldRate = pluckNumber(y,/\('#goldrate_22ct'\)\.html\("\d\d\d\d.00"\)/,/\d\d\d\d/);
+    silverRate = pluckNumber(y,/\('#silverrate_1gm'\)\.html\("\d{2,3}.\d\d"\)/,/\d{2,3}.\d\d/);
+}

@@ -1236,6 +1236,10 @@
             flex-grow: 0;
             flex-shrink: 0;
         }
+
+        [data-negative] {
+            color: red;
+        }
     </style>
     <script>
         /*! For license information please see html5-qrcode.min.js.LICENSE.txt */
@@ -1432,7 +1436,7 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                             </div>
                         </div>
                         <div style="width: 100%;">
-                            <span hidden id="goldliveratevalue" style="display: flex;flex-direction: row;justify-content: center;border-top: 1px solid #000;width: 100%;font-weight: bold;"></span>
+                            <span hidden id="goldliveratevalue" style="display: flex;flex-direction: column;justify-content: center;border-top: 1px solid #000;width: 100%;font-weight: bold;"></span>
                         </div>
                         <div  style="width: 100%;">
                             <span hidden id="silverliveratevalue" style="display: flex;flex-direction: row;justify-content: center;border-top: 1px solid #000;width: 100%;font-weight: bold;"></span>
@@ -2625,8 +2629,8 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
 
                 fetchCustom(`https://thejewellersassociation.org/?_=${Number(new Date())}`, y => {
                         var updatedTime = pluckNumber(y,/\('#updatetime'\)\.html\("[A-Za-z0-9\/: ]+"\)/,/"(.*?)"/)[1];
-                        goldFinder = pluckNumber(y,/\('#goldrate_22ct'\)\.html\("\d\d\d\d.00"\)/,/\d\d\d\d/);
-                        silverFinder = pluckNumber(y,/\('#silverrate_1gm'\)\.html\("\d{2,3}.\d\d"\)/,/\d{2,3}.\d\d/);
+                        goldFinder = pluckNumber(y,/"gold_rate">\d\d\d\d.00/,/\d\d\d\d/);
+                        silverFinder = pluckNumber(y,/"silver_rate">\d\d\d.00/,/\d{2,3}.\d\d/);
                         
                         document.getElementById("test2").innerHTML = `<span>Loaded</span><br/></span>prev=${localStorage.getItem('cheTime')}</span><br/></span>curr= ${updatedTime}</span><br/><strong>same</strong>`;
                         if (localStorage.getItem('cheTime') != null && updatedTime != '' && updatedTime != localStorage.getItem('cheTime')) {
@@ -2741,8 +2745,9 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
             } else {
 
                 fetchCustom(`https://thejewellersassociation.org/?_=${Number(new Date())}`, y => {
-                    var chennai_gold_rate = pluckNumber(y,/\('#goldrate_22ct'\)\.html\("\d\d\d\d.00"\)/,/\d\d\d\d/);
-                    var chennai_silver_rate = pluckNumber(y,/\('#silverrate_1gm'\)\.html\("\d{2,3}.\d\d"\)/,/\d{2,3}.\d\d/);
+                    var chennai_gold_rate = pluckNumber(y,/"gold_rate">\d\d\d\d.00/,/\d\d\d\d/);
+                    var chennai_silver_rate = pluckNumber(y,/"silver_rate">\d\d\d.00/,/\d{2,3}.\d\d/);
+                    console.log(chennai_gold_rate);
                     var chennai_update_time = pluckNumber(y,/\('#updatetime'\)\.html\("[A-Za-z0-9\/: ]+"\)/,/"(.*?)"/);
                     online_market = {
                         gold_rate: chennai_gold_rate,
@@ -2782,7 +2787,7 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
         var gold_precision_value = 2;
         var silver_precision_value = 3;
 
-        var tcs_value = 50 / gold_rate_weight_factor;
+        var tcs_value = 60 / gold_rate_weight_factor;
         var prbullion = {
             gold_rate: 0,
             silver_rate: 0,
@@ -3179,8 +3184,10 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                 amsbullion.silver_sell_difference = amsbullion.silver_rate - amsbullion.mcx_silver;
 
                 predictionvalues.value = roundTo(roundTo(predictionvalues.usdperounce,2)*roundTo(predictionvalues.inrperusd,3)/predictionvalues.ouncetogm,2);
+                predictionvalues.valueSilver = roundTo(roundTo(predictionvalues.silverusdperounce,2)*roundTo(predictionvalues.inrperusd,3)/predictionvalues.ouncetogm,2);
 
-                var predictionWithTaxes = roundTo(predictionvalues.value * 1.15,2);
+                var predictionWithTaxes = roundTo(predictionvalues.value * 1.06,2);
+                var predictionWithTaxesSilver = roundTo(predictionvalues.valueSilver * 1.06,2);
                 var format = 'hh:mm:ss'
                 var time = moment();
                 var beforeTime = moment('00:00:00', format),
@@ -3191,6 +3198,8 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                     prbullion.mcx_gold = predictionWithTaxes - Number(localStorage.getItem('world_mcx_prevoius_day_differce_pr'));
                     amsbullion.mcx_gold = predictionWithTaxes - Number(localStorage.getItem('world_mcx_prevoius_day_differce_ams'));
 
+                    prbullion.mcx_silver = predictionWithTaxesSilver - Number(localStorage.getItem('world_mcx_prevoius_day_differce_pr_silver'));
+                    amsbullion.mcx_silver = predictionWithTaxesSilver - Number(localStorage.getItem('world_mcx_prevoius_day_differce_ams_silver'));
                 } 
 
                 var pr_gold_breakup_values = {
@@ -3244,6 +3253,10 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
 
                 var predictionDifferenceWithPr = predictionWithTaxes - pr_gold_breakup_values.mcx;
                 var predictionDifferenceWithAms = predictionWithTaxes - ams_gold_breakup_values.mcx;
+
+                var predictionDifferenceWithPrSilver = predictionWithTaxesSilver - pr_silver_breakup_values.mcx;
+                var predictionDifferenceWithAmsSilver = predictionWithTaxesSilver - ams_silver_breakup_values.mcx;
+
                 var silver_asso_difference_pr = Number(online_market.silver_rate) - Number(prbullion.silver_rate);
                 var silver_asso_difference_ams = Number(online_market.silver_rate) - Number(amsbullion.silver_rate);
 
@@ -3251,8 +3264,12 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                     console.log('is not between');
                     localStorage.setItem('world_mcx_prevoius_day_differce_pr',predictionDifferenceWithPr);
                     localStorage.setItem('world_mcx_prevoius_day_differce_ams',predictionDifferenceWithAms);
+
+                    localStorage.setItem('world_mcx_prevoius_day_differce_pr_silver',predictionDifferenceWithPrSilver);
+                    localStorage.setItem('world_mcx_prevoius_day_differce_ams_silver',predictionDifferenceWithAmsSilver);
                 }
                 console.log(localStorage.getItem('world_mcx_prevoius_day_differce_pr'),localStorage.getItem('world_mcx_prevoius_day_differce_ams'))
+                console.log(localStorage.getItem('world_mcx_prevoius_day_differce_pr_silver'),localStorage.getItem('world_mcx_prevoius_day_differce_ams_silver'))
 
                 function displayWithSign(numberValue,precisionValue){
                     return ['-','+'][+(numberValue > 0)] + roundTo(Math.abs(numberValue),precisionValue,'string');
@@ -3264,24 +3281,24 @@ var __Html5QrcodeLibrary__;(()=>{var t={449:function(t,e,r){!function(t){"use st
                     return resValue;
                 }
 
-                document.querySelector('#footerbox1 .startOfEllipsis').innerText = `(${roundTo(predictionvalues.usdperounce,2,'string')} * ${roundTo(predictionvalues.inrperusd,3,'string')} / 31.1035) + 15%  = (${roundTo(predictionvalues.value,2,'string')} + 15% ) = ${roundTo(predictionWithTaxes,2,'string')}`;
+                document.querySelector('#footerbox1 .startOfEllipsis').innerText = `(${roundTo(predictionvalues.usdperounce,2,'string')} * ${roundTo(predictionvalues.inrperusd,3,'string')} / 31.1035) + 6%  = (${roundTo(predictionvalues.value,2,'string')} + 6% ) = ${roundTo(predictionWithTaxes,2,'string')}`;
                 document.querySelector('#footerbox1 .endOfEllipsis').innerText = ` [${displayTwoNumbers(predictionDifferenceWithPr,predictionDifferenceWithAms,2,true)}]`;
 
-                document.querySelector('#footerbox1 #goldliveratevalue').innerText = 
+                var pr_diff = ((Number(online_market.gold_rate)*1.03) - (Number(prbullion.gold_rate)*0.92)).toFixed(2);
+                var ams_diff = ((Number(online_market.gold_rate)*1.03) - (Number(amsbullion.gold_rate)*0.92)).toFixed(2);
+                document.querySelector('#footerbox1 #goldliveratevalue').innerHTML = 
                                                         displayTwoNumbers(pr_gold_breakup_values.mcx, ams_gold_breakup_values.mcx, gold_precision_value) + ' + ' +
                                                         displayTwoNumbers(pr_gold_breakup_values.tax, ams_gold_breakup_values.tax, 0) + ' + ' +
                                                         displayTwoNumbers(pr_gold_breakup_values.difference, ams_gold_breakup_values.difference, gold_precision_value) + ' + ' +
                                                         displayTwoNumbers(pr_gold_breakup_values.tcs, ams_gold_breakup_values.tcs, 0) + ' = ' +                                                 
                                                         displayTwoNumbers(prbullion.gold_rate, amsbullion.gold_rate, gold_precision_value)
-                                                        + ' [' +
-                                                        displayTwoNumbers((Math.trunc((Number(prbullion.gold_rate)*0.92)+market_rate_loss_difference)) -  Number(online_market.gold_rate) ,(Math.trunc((Number(amsbullion.gold_rate)*0.92)+market_rate_loss_difference)) -  Number(online_market.gold_rate) ,2, true) + ']';
+                                                        + `<span>[<span style="color:${pr_diff>0? 'green' : 'red'}"}>${pr_diff}</span> ` + ` &nbsp;&nbsp;<span style="color:${ams_diff>0? 'green' : 'red'}"}>${ams_diff}</span>]</span>`;
                 
                 document.querySelector('#footerbox1 #silverliveratevalue').innerText = 
                                                         displayTwoNumbers(pr_silver_breakup_values.mcx, ams_silver_breakup_values.mcx, silver_precision_value) + ' + ' +
                                                         displayTwoNumbers(pr_silver_breakup_values.difference, ams_silver_breakup_values.difference, silver_precision_value) + ' = ' +
                                                         displayTwoNumbers(prbullion.silver_rate, amsbullion.silver_rate , silver_precision_value) + ' [' +
-                                                        displayTwoNumbers(silver_asso_difference_pr, silver_asso_difference_ams, silver_precision_value,true) + ']' + ' >> '
-                                                        + displayTwoNumbers(prbullion.silver_rate + silver_excess_difference, amsbullion.silver_rate + silver_excess_difference, 2);
+                                                        displayTwoNumbers(silver_asso_difference_pr, silver_asso_difference_ams, silver_precision_value,true) + ']';
                 // document.querySelector('#footerbox1 #goldsilverratioratevalue').innerText = 
                 //                                         `${predictionvalues.usdperounce.toFixed(2)}(${amsbullion.mcx_gold.toFixed(2)})[${amsbullion.gold_rate.toFixed(2)}]<${Number(online_market.gold_rate).toFixed(2)}>` + ' / ' +
                 //                                         `${predictionvalues.silverusdperounce.toFixed(2)}(${amsbullion.mcx_silver.toFixed(2)})[${amsbullion.silver_rate.toFixed(2)}]<${Number(online_market.silver_rate).toFixed(2)}>` + ' = ' + `${(Number(predictionvalues.usdperounce.toFixed(2))/Number(predictionvalues.silverusdperounce.toFixed(2))).toFixed(2)}(${(Number(amsbullion.mcx_gold.toFixed(2))/Number(amsbullion.mcx_silver.toFixed(2))).toFixed(2)})[${(Number(amsbullion.gold_rate.toFixed(2))/Number(amsbullion.silver_rate.toFixed(2))).toFixed(2)}]<${(Number(Number(online_market.gold_rate).toFixed(2))/Number(Number(online_market.silver_rate).toFixed(2))).toFixed(2)}>`;
